@@ -26,6 +26,7 @@
       color: white;
       padding: 15px;
       text-align: center;
+      animation: fadeSlideIn 0.8s ease;
     }
     header h1 { margin: 0; font-size: 1.8em; }
 
@@ -44,6 +45,7 @@
       padding: 15px;
       display: flex;
       flex-direction: column;
+      animation: fadeSlideIn 0.7s ease forwards;
     }
 
     h2 { margin-top: 0; }
@@ -81,9 +83,12 @@
       color: white;
       font-weight: bold;
       cursor: pointer;
-      transition: 0.3s;
+      transition: transform 0.2s ease, background 0.3s;
     }
-    button:hover { background: #8e44ad; }
+    button:hover { 
+      background: #8e44ad; 
+      transform: translateY(-3px) scale(1.02);
+    }
 
     #document-preview {
       flex: 1;
@@ -92,10 +97,10 @@
       background: #fff;
       padding: 25px;
       overflow-y: auto;
-      font-size: 18px;
+      font-size: 18px; /* default font size */
       line-height: 1.6;
       white-space: pre-wrap;
-      transition: color 0.3s ease;
+      transition: all 0.3s ease-in-out;
     }
 
     /* Paper styles */
@@ -138,6 +143,12 @@
     .ink-blue { color: #0000ff; }
     .ink-red { color: #ff0000; }
     .ink-green { color: #008000; }
+
+    /* Animations */
+    @keyframes fadeSlideIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -180,10 +191,22 @@
       <option value="ink-green">Green</option>
     </select>
 
-    <label><strong>Upload Handwriting Font (.ttf):</strong></label>
+    <label><strong>Choose Font Size:</strong></label>
+    <select id="font-size">
+      <option value="14">14px</option>
+      <option value="16">16px</option>
+      <option value="18" selected>18px</option>
+      <option value="20">20px</option>
+      <option value="22">22px</option>
+      <option value="24">24px</option>
+      <option value="28">28px</option>
+      <option value="32">32px</option>
+    </select>
+
+    <label><strong>Upload Handwriting Font [.ttf]:</strong></label>
     <input type="file" id="font-upload" accept=".ttf">
 
-    <label><strong>Upload Paper Background:</strong></label>
+    <label><strong>Upload Paper Background [.jpg]:</strong></label>
     <input type="file" id="paper-upload" accept="image/*">
 
     <div class="export-buttons">
@@ -208,10 +231,15 @@
   const inkSelect = document.getElementById("ink-color");
   const fontUpload = document.getElementById("font-upload");
   const paperUpload = document.getElementById("paper-upload");
+  const fontSizeSelect = document.getElementById("font-size");
 
-  // Update preview text
+  // Update preview text with fade animation
   textInput.addEventListener("input", () => {
-    preview.textContent = textInput.value;
+    preview.style.opacity = 0;
+    setTimeout(() => {
+      preview.textContent = textInput.value;
+      preview.style.opacity = 1;
+    }, 150);
   });
 
   // Handwriting style
@@ -231,6 +259,11 @@
   inkSelect.addEventListener("change", () => {
     preview.classList.remove("ink-black", "ink-blue", "ink-red", "ink-green");
     preview.classList.add(inkSelect.value);
+  });
+
+  // Font size
+  fontSizeSelect.addEventListener("change", () => {
+    preview.style.fontSize = fontSizeSelect.value + "px";
   });
 
   // Upload font
@@ -289,7 +322,7 @@
   // Print
   document.getElementById("print-doc").addEventListener("click", () => {
     const printWindow = window.open("", "_blank");
-    printWindow.document.write("<pre style='font-family:" + getComputedStyle(preview).fontFamily + "; font-size:18px;'>" + preview.textContent + "</pre>");
+    printWindow.document.write("<pre style='font-family:" + getComputedStyle(preview).fontFamily + "; font-size:" + getComputedStyle(preview).fontSize + ";'>" + preview.textContent + "</pre>");
     printWindow.document.close();
     printWindow.print();
   });
