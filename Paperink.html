@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PaperInk - Text to Handwriting Converter</title>
+
+  <!-- Google Handwriting + Hindi Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&family=Patrick+Hand&family=Caveat&family=Shadows+Into+Light&family=Gloria+Hallelujah&family=Architects+Daughter&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet">
+
+  <!-- html2canvas & jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    body {
+      margin: 0; padding: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f3f7;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: linear-gradient(135deg, #6c5ce7, #8e44ad);
+      color: white;
+      padding: 15px;
+      text-align: center;
+      animation: fadeSlideIn 0.8s ease;
+    }
+    header h1 { margin: 0; font-size: 1.8em; }
+
+    .workspace {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      padding: 15px;
+    }
+
+    .editor, .preview {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      animation: fadeSlideIn 0.7s ease forwards;
+    }
+
+    h2 { margin-top: 0; }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      min-height: 300px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 14px;
+      resize: vertical;
+      line-height: 1.5;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    select, input[type="file"] {
+      margin: 8px 0 15px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      width: 100%;
+      background: #fff;
+    }
+
+    button {
+      margin: 5px 0;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #6c5ce7;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s;
+    }
+    button:hover { 
+      background: #8e44ad; 
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    #document-preview {
+      flex: 1;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      padding: 25px;
+      overflow-y: auto;
+      font-size: 18px; /* default font size */
+      line-height: 1.6;
+      white-space: pre-wrap;
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Paper styles */
+    #document-preview.lined {
+      background-image: repeating-linear-gradient(#ccc 0 1px, transparent 1px 25px);
+    }
+    #document-preview.grid {
+      background-image: linear-gradient(to right, #ccc 1px, transparent 1px),
+                        linear-gradient(to bottom, #ccc 1px, transparent 1px);
+      background-size: 25px 25px;
+    }
+    #document-preview.vintage {
+      background-color: #f4e8d8;
+    }
+    #document-preview.hindi {
+      background-color: #fffbe6;
+      background-image: repeating-linear-gradient(#d4a017 0 1px, transparent 1px 30px);
+    }
+
+    /* Handwriting fonts */
+    .indie { font-family: 'Indie Flower', cursive; }
+    .patrick { font-family: 'Patrick Hand', cursive; }
+    .caveat { font-family: 'Caveat', cursive; }
+    .shadows { font-family: 'Shadows Into Light', cursive; }
+    .gloria { font-family: 'Gloria Hallelujah', cursive; }
+    .architect { font-family: 'Architects Daughter', cursive; }
+    .hindiFont { font-family: 'Tiro Devanagari Hindi', serif; }
+
+    .export-buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+    .export-buttons button {
+      flex: 1;
+    }
+
+    /* Ink colors */
+    .ink-black { color: #000; }
+    .ink-blue { color: #0000ff; }
+    .ink-red { color: #ff0000; }
+    .ink-green { color: #008000; }
+
+    /* Animations */
+    @keyframes fadeSlideIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>PaperInk - Text to Handwriting</h1>
+</header>
+
+<div class="workspace">
+  <!-- Left: Editor -->
+  <div class="editor">
+    <h2>Enter Your Text</h2>
+    <textarea id="text-input" placeholder="Type or paste your text..."></textarea>
+
+    <label><strong>Choose Handwriting Style:</strong></label>
+    <select id="handwriting-style">
+      <option value="indie">Indie Flower</option>
+      <option value="patrick">Patrick Hand</option>
+      <option value="caveat">Caveat</option>
+      <option value="shadows">Shadows Into Light</option>
+      <option value="gloria">Gloria Hallelujah</option>
+      <option value="architect">Architects Daughter</option>
+      <option value="hindiFont">Hindi Handwriting</option>
+    </select>
+
+    <label><strong>Choose Paper Style:</strong></label>
+    <select id="paper-style">
+      <option value="plain">Plain</option>
+      <option value="lined">Lined</option>
+      <option value="grid">Grid</option>
+      <option value="vintage">Vintage</option>
+      <option value="hindi">Hindi Paper</option>
+    </select>
+
+    <label><strong>Choose Ink Color:</strong></label>
+    <select id="ink-color">
+      <option value="ink-black">Black</option>
+      <option value="ink-blue">Blue</option>
+      <option value="ink-red">Red</option>
+      <option value="ink-green">Green</option>
+    </select>
+
+    <label><strong>Choose Font Size:</strong></label>
+    <select id="font-size">
+      <option value="14">14px</option>
+      <option value="16">16px</option>
+      <option value="18" selected>18px</option>
+      <option value="20">20px</option>
+      <option value="22">22px</option>
+      <option value="24">24px</option>
+      <option value="28">28px</option>
+      <option value="32">32px</option>
+    </select>
+
+    <label><strong>Upload Handwriting Font [.ttf]:</strong></label>
+    <input type="file" id="font-upload" accept=".ttf">
+
+    <label><strong>Upload Paper Background [.jpg]:</strong></label>
+    <input type="file" id="paper-upload" accept="image/*">
+
+    <div class="export-buttons">
+      <button id="export-pdf">Export PDF</button>
+      <button id="download-png">Download PNG</button>
+      <button id="print-doc">Print</button>
+    </div>
+  </div>
+
+  <!-- Right: Live Preview -->
+  <div class="preview">
+    <h2>Live Preview</h2>
+    <div id="document-preview" class="plain indie ink-black"></div>
+  </div>
+</div>
+
+<script>
+  const textInput = document.getElementById("text-input");
+  const preview = document.getElementById("document-preview");
+  const handwritingSelect = document.getElementById("handwriting-style");
+  const paperSelect = document.getElementById("paper-style");
+  const inkSelect = document.getElementById("ink-color");
+  const fontUpload = document.getElementById("font-upload");
+  const paperUpload = document.getElementById("paper-upload");
+  const fontSizeSelect = document.getElementById("font-size");
+
+  // Update preview text with fade animation
+  textInput.addEventListener("input", () => {
+    preview.style.opacity = 0;
+    setTimeout(() => {
+      preview.textContent = textInput.value;
+      preview.style.opacity = 1;
+    }, 150);
+  });
+
+  // Handwriting style
+  handwritingSelect.addEventListener("change", () => {
+    preview.classList.remove("indie", "patrick", "caveat", "shadows", "gloria", "architect", "hindiFont");
+    preview.classList.add(handwritingSelect.value);
+  });
+
+  // Paper style
+  paperSelect.addEventListener("change", () => {
+    preview.classList.remove("plain", "lined", "grid", "vintage", "hindi");
+    preview.style.backgroundImage = ""; // reset custom paper
+    preview.classList.add(paperSelect.value);
+  });
+
+  // Ink color
+  inkSelect.addEventListener("change", () => {
+    preview.classList.remove("ink-black", "ink-blue", "ink-red", "ink-green");
+    preview.classList.add(inkSelect.value);
+  });
+
+  // Font size
+  fontSizeSelect.addEventListener("change", () => {
+    preview.style.fontSize = fontSizeSelect.value + "px";
+  });
+
+  // Upload font
+  fontUpload.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const font = new FontFace("CustomFont", ev.target.result);
+        font.load().then((loadedFont) => {
+          document.fonts.add(loadedFont);
+          preview.style.fontFamily = "CustomFont";
+        });
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  });
+
+  // Upload paper
+  paperUpload.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        preview.style.backgroundImage = `url(${ev.target.result})`;
+        preview.style.backgroundSize = "cover";
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Export PDF
+  document.getElementById("export-pdf").addEventListener("click", () => {
+    const { jsPDF } = window.jspdf;
+    html2canvas(preview).then(canvas => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgWidth = pageWidth;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.save("paperink-output.pdf");
+    });
+  });
+
+  // Download PNG
+  document.getElementById("download-png").addEventListener("click", () => {
+    html2canvas(preview).then(canvas => {
+      const link = document.createElement("a");
+      link.download = "paperink-output.png";
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  });
+
+  // Print
+  document.getElementById("print-doc").addEventListener("click", () => {
+    const printWindow = window.open("", "_blank");
+    printWindow.document.write("<pre style='font-family:" + getComputedStyle(preview).fontFamily + "; font-size:" + getComputedStyle(preview).fontSize + ";'>" + preview.textContent + "</pre>");
+    printWindow.document.close();
+    printWindow.print();
+  });
+</script>
+
+</body>
+</html>
