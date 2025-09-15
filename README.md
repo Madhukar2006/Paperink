@@ -17,16 +17,3 @@ The goal is to provide a clean, fast, and user-friendly tool for students, teach
 - 📥 Export as PDF or image  
 
 ---
-
-## Tech Stack  
-- **Frontend:** HTML, CSS, JavaScript  
-- **Backend:** Node.js / Python (depending on implementation)  
-- **Other Tools:** Canvas API / Custom font rendering  
-
----
-
-## Installation  
-
-1. Clone this repository  
-   ```bash
-   (https://madhukar2006.github.io/Paperink/)
