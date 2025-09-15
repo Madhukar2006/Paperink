@@ -29,5 +29,4 @@ The goal is to provide a clean, fast, and user-friendly tool for students, teach
 
 1. Clone this repository  
    ```bash
-   git clone https://github.com/your-username/paperink.git
-   cd paperink
+   (https://madhukar2006.github.io/Paperink/)
