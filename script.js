@@ -39,7 +39,7 @@ inkSelect.addEventListener("change", () => {
 fontSizeSelect.addEventListener("change", () => {
   preview.style.fontSize = fontSizeSelect.value + "px";
 });
-
+               
 // Upload custom handwriting font
 fontUpload.addEventListener("change", (e) => {
   const file = e.target.files[0];
@@ -106,3 +106,4 @@ document.getElementById("print-doc").addEventListener("click", () => {
   printWindow.document.close();
   printWindow.print();
 });
+
