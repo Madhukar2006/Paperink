@@ -13,7 +13,7 @@ The goal is to provide a clean, fast, and user-friendly tool for students, teach
 - 📄 Upload or type text directly  
 - ✏️ Choose from multiple handwriting styles  
 - 🎨 Customize size, spacing, and color  
-- 🖼️ Preview before saving  
+- 🖼️ Preview before saving      
 - 📥 Export as PDF or image  
 
 ---
