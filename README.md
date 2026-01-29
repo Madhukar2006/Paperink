@@ -10,7 +10,7 @@ The goal is to provide a clean, fast, and user-friendly tool for students, teach
 ---
 
 ## Features  
-- 📄 Upload or type text directly  
+- 📄 Upload or type text directly   
 - ✏️ Choose from multiple handwriting styles  
 - 🎨 Customize size, spacing, and color  
 - 🖼️ Preview before saving      
