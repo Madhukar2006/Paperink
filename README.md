@@ -60,12 +60,6 @@ The project was created with a focus on **simplicity, customization, and a clean
 
 ---
 
-## 📸 Preview
-
-<p align="center">
-  <img src="YOUR_SCREENSHOT_URL" alt="PaperInk Preview" width="90%">
-</p>
-
 ## 🎯 Why PaperInk?
 
 PaperInk was designed around a simple idea:
